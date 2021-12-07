@@ -1,0 +1,10 @@
+../Benchmarks/jtsp/a27
+../Benchmarks/jtsp/b27
+../Benchmarks/jtsp/c27
+../Benchmarks/jtsp/d27
+../Benchmarks/jtsp/e27
+../Benchmarks/jtsp/f27
+../Benchmarks/jtsp/g27
+../Benchmarks/jtsp/h27
+../Benchmarks/jtsp/i27
+../Benchmarks/jtsp/j27

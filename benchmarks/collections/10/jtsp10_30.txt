@@ -1,0 +1,10 @@
+../Benchmarks/jtsp/a30
+../Benchmarks/jtsp/b30
+../Benchmarks/jtsp/c30
+../Benchmarks/jtsp/d30
+../Benchmarks/jtsp/e30
+../Benchmarks/jtsp/f30
+../Benchmarks/jtsp/g30
+../Benchmarks/jtsp/h30
+../Benchmarks/jtsp/i30
+../Benchmarks/jtsp/j30

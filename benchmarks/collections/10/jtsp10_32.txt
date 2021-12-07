@@ -1,0 +1,10 @@
+../Benchmarks/jtsp/a32
+../Benchmarks/jtsp/b32
+../Benchmarks/jtsp/c32
+../Benchmarks/jtsp/d32
+../Benchmarks/jtsp/e32
+../Benchmarks/jtsp/f32
+../Benchmarks/jtsp/g32
+../Benchmarks/jtsp/h32
+../Benchmarks/jtsp/i32
+../Benchmarks/jtsp/j32

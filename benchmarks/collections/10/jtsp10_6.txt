@@ -1,0 +1,10 @@
+../Benchmarks/jtsp/a6
+../Benchmarks/jtsp/b6
+../Benchmarks/jtsp/c6
+../Benchmarks/jtsp/d6
+../Benchmarks/jtsp/e6
+../Benchmarks/jtsp/f6
+../Benchmarks/jtsp/g6
+../Benchmarks/jtsp/h6
+../Benchmarks/jtsp/i6
+../Benchmarks/jtsp/j6

@@ -1,0 +1,10 @@
+../Benchmarks/jtsp/a18
+../Benchmarks/jtsp/b18
+../Benchmarks/jtsp/c18
+../Benchmarks/jtsp/d18
+../Benchmarks/jtsp/e18
+../Benchmarks/jtsp/f18
+../Benchmarks/jtsp/g18
+../Benchmarks/jtsp/h18
+../Benchmarks/jtsp/i18
+../Benchmarks/jtsp/j18

@@ -1,0 +1,10 @@
+../Benchmarks/jtsp/a25
+../Benchmarks/jtsp/b25
+../Benchmarks/jtsp/c25
+../Benchmarks/jtsp/d25
+../Benchmarks/jtsp/e25
+../Benchmarks/jtsp/f25
+../Benchmarks/jtsp/g25
+../Benchmarks/jtsp/h25
+../Benchmarks/jtsp/i25
+../Benchmarks/jtsp/j25

@@ -1,0 +1,10 @@
+../Benchmarks/jtsp/a33
+../Benchmarks/jtsp/b33
+../Benchmarks/jtsp/c33
+../Benchmarks/jtsp/d33
+../Benchmarks/jtsp/e33
+../Benchmarks/jtsp/f33
+../Benchmarks/jtsp/g33
+../Benchmarks/jtsp/h33
+../Benchmarks/jtsp/i33
+../Benchmarks/jtsp/j33

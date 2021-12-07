@@ -7,4 +7,4 @@
 #SBATCH -t 00:10:00
 #SBATCH -N 2
 
-mpirun -np 2 ./src/main
+mpirun -np 2 ./src/main -i ./benchmarks/TSPLIB/gr202
