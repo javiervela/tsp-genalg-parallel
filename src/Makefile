@@ -4,7 +4,8 @@ TSPLIB = ./TSPLIB/tsplib
 GENETIC = ./Genetic/genetic
 TSPLIB_H = ./TSPLIB/
 GENETIC_H = ./Genetic/
-CC = g++
+#CC = g++
+CC = mpic++
 CFLAGS = -O3 -I$(GENETIC_H) -I$(TSPLIB_H)
 
 all: $(TARGETS)
