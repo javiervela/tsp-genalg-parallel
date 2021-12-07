@@ -15,6 +15,7 @@
 #include <iostream>
 #include <algorithm>
 #include "genetic.h"
+#include "mpi.h"
 
 using namespace std;
 
@@ -193,6 +194,12 @@ void print_best_gnome(int gen, std::vector<individual> &population, std::ostream
  */
 void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER_GNOME, int MAX_NUMBER_MUTATIONS, int GEN_BATCH)
 {
+
+	int rank, size;
+	int root = 0;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+
 	srand(time(NULL));
 
 	// Generation Number
@@ -203,12 +210,36 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 
 	// Populating the GNOME pool.
 	int initial_city = 0;
+
+	if (rank == 0)
+	{
+		int value = 17;
+		int result = MPI_Send(&value, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+		if (result == MPI_SUCCESS)
+			std::cout << "Rank 0 OK!" << std::endl;
+	}
+	else if (rank == 1)
+	{
+		int value;
+		int result = MPI_Recv(&value, 1, MPI_INT, 0, 0, MPI_COMM_WORLD,
+							  MPI_STATUS_IGNORE);
+		if (result == MPI_SUCCESS && value == 17)
+			std::cout << "Rank 1 OK!" << std::endl;
+	}
+
+	return;
+
+	// Root initializes the particles and broadcasts them
+	// if (rank == root)
+	//{
 	for (int i = 0; i < POPULATION_SIZE; i++)
 	{
 		temp.gnome = create_gnome(tsp.dimension, initial_city);
 		temp.fitness = calculate_fitness(temp.gnome, tsp);
 		population.push_back(temp);
 	}
+	//}
+
 	/* DEBUG */ // print_best_gnome(gen, population);
 
 	// Order population based on fitness

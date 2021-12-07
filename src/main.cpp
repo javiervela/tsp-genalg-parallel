@@ -14,6 +14,7 @@
 #include <algorithm>
 #include "tsplib.h"
 #include "genetic.h"
+#include "mpi.h"
 
 using namespace std;
 
@@ -33,12 +34,17 @@ using namespace std;
  */
 int main(int argc, char **argv)
 {
+
+	MPI_Init(&argc, &argv);
+
 	ifstream probfs, solfs;
 	parseArgs(argc, argv, probfs, solfs);
 	Map tsp = readProblem(probfs);
 	GenAlg(tsp, POPULATION_SIZE, NUMBER_GENERATIONS, CHILD_PER_GNOME, MAX_NUMBER_MUTATIONS, GEN_BATCH);
 	readSolution(solfs, tsp);
 	cout << "OPT          " << tsp.optimalCost << endl;
+
+	MPI_Finalize();
 
 	return 0;
 }
