@@ -29,7 +29,7 @@ using namespace std;
  */
 void serialize_population(std::vector<individual> &population, int first_n, int *gnome_v, float *fitness_v)
 {
-	gnome_v = new int[first_n * population[1].size() + 1];
+	gnome_v = new int[first_n * population[1].gnome.size() + 1];
 	fitness_v = new float[first_n];
 
 	int n = 1;
@@ -37,7 +37,7 @@ void serialize_population(std::vector<individual> &population, int first_n, int 
 	int f_v_i = 0;
 
 	// Set gnome size at beggining of vector
-	gnome_v[g_v_i++] = population[1].size();
+	gnome_v[g_v_i++] = population[1].gnome.size();
 
 	for (auto indi : population)
 	{
@@ -276,6 +276,7 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 	// Populating the GNOME pool.
 	int initial_city = 0;
 
+	/* 
 	if (rank == 0)
 	{
 		int value = 17;
@@ -290,20 +291,59 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 							  MPI_STATUS_IGNORE);
 		if (result == MPI_SUCCESS && value == 17)
 			std::cout << "Rank 1 OK!" << std::endl;
-	}
-
-	return;
+	} 
+	*/
 
 	// Root initializes the particles and broadcasts them
 	// if (rank == root)
 	//{
-	for (int i = 0; i < POPULATION_SIZE; i++)
+	/* for (int i = 0; i < POPULATION_SIZE; i++)
 	{
 		temp.gnome = create_gnome(tsp.dimension, initial_city);
 		temp.fitness = calculate_fitness(temp.gnome, tsp);
 		population.push_back(temp);
-	}
+	} */
 	//}
+
+	int test_dimension = 5;
+	for (int i = 0; i < POPULATION_SIZE; i++)
+	{
+		temp.gnome = create_gnome(test_dimension, initial_city);
+		temp.fitness = calculate_fitness(temp.gnome, tsp);
+		population.push_back(temp);
+	}
+
+	for (auto indi : population)
+	{
+		cout << "fitness: " << indi.fitness << endl;
+		for (auto city : indi.gnome)
+		{
+			cout << city << " ";
+		}
+		cout << endl;
+	}
+
+	int *gnome_v;
+	float *fitness_v;
+	int first_n = 2;
+	serialize_population(population, first_n, gnome_v, fitness_v);
+	int size_gnome_v = first_n * test_dimension + 1;
+	int size_fitness_v = first_n;
+
+	cout << "FITNESS" << endl;
+	for (int i = 0; i < size_fitness_v; i++)
+	{
+		cout << fitness_v[i] << " ";
+	}
+	cout << endl;
+	cout << "GNOMES (" << gnome_v[0] << ")" << endl;
+	for (int i = 1; i < size_gnome_v; i++)
+	{
+		cout << gnome_v[i] << " ";
+	}
+	cout << endl;
+
+	return;
 
 	/* DEBUG */ // print_best_gnome(gen, population);
 
