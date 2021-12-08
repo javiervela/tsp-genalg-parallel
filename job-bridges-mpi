@@ -2,9 +2,9 @@
 #SBATCH -A see180004p # 2021 Allocation -- This might change in the following years.
 #SBATCH -J tsp-genalg-parallel
 #SBATCH -o tsp-genalg-parallel.stdout
-#SBATCH -n 1
+#SBATCH -n 2
 #SBATCH -p RM
 #SBATCH -t 00:10:00
-#SBATCH -N 1
+#SBATCH -N 2
 
-mpirun -np 1 ./src/main -i ./benchmarks/TSPLIB/gr202
+mpirun -np 2 ./src/main -i ./benchmarks/TSPLIB/gr202

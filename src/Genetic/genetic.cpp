@@ -64,7 +64,7 @@ void serialize_population(std::vector<individual> &population, int first_n, int 
  */
 void deserialize_population(std::vector<individual> &population, int n, int *gnome_v, float *fitness_v)
 {
-	population.clear();
+	//population.clear();
 
 	int g_v_i = 0;
 	int f_v_i = 0;
@@ -72,15 +72,16 @@ void deserialize_population(std::vector<individual> &population, int n, int *gno
 	// Read size of gnomes
 	int size_gnome = gnome_v[g_v_i++];
 
+	individual aux_ind;
 	// Deserialize vectors
 	for (int indi_i = 0; indi_i < n; indi_i++)
 	{
-		individual aux_ind;
 		aux_ind.fitness = fitness_v[f_v_i++];
 		for (int city_i = 0; city_i < size_gnome; city_i++)
 		{
 			aux_ind.gnome.push_back(gnome_v[g_v_i++]);
 		}
+		population.push_back(aux_ind)
 	}
 }
 
@@ -286,7 +287,7 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 			population.push_back(temp);
 		}
 	}
-	
+
 	/* 
 	int first_n = 2;
 	
