@@ -81,7 +81,7 @@ void deserialize_population(std::vector<individual> &population, int n, int *gno
 		{
 			aux_ind.gnome.push_back(gnome_v[g_v_i++]);
 		}
-		population.push_back(aux_ind)
+		population.push_back(aux_ind);
 	}
 }
 
@@ -261,12 +261,12 @@ void print_best_gnome(int gen, std::vector<individual> &population, std::ostream
 void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER_GNOME, int MAX_NUMBER_MUTATIONS, int GEN_BATCH)
 {
 
-	int rank, size;
-	int root = 0;
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	int mpi_rank, mpi_size;
+	int mpi_root = 0;
+	MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-	srand(time(NULL));
+	srand(time(NULL) + mpi_rank);
 
 	// Generation Number
 	int gen = 1;
@@ -274,18 +274,24 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 	vector<struct individual> population;
 	struct individual temp;
 
+	// Each node initialize its particles
+	int NODE_POPULATION_SIZE;
+	if (mpi_rank == mpi_root)
+	{
+		NODE_POPULATION_SIZE = POPULATION_SIZE / mpi_size + (POPULATION_SIZE % (POPULATION_SIZE / mpi_size));
+	}
+	else
+	{
+		NODE_POPULATION_SIZE = POPULATION_SIZE / mpi_size;
+	}
+
 	// Populating the GNOME pool.
 	int initial_city = 0;
-
-	// Root initializes the particles and broadcasts them
-	if (rank == root)
+	for (int i = 0; i < NODE_POPULATION_SIZE; i++)
 	{
-		for (int i = 0; i < POPULATION_SIZE; i++)
-		{
-			temp.gnome = create_gnome(tsp.dimension, initial_city);
-			temp.fitness = calculate_fitness(temp.gnome, tsp);
-			population.push_back(temp);
-		}
+		temp.gnome = create_gnome(tsp.dimension, initial_city);
+		temp.fitness = calculate_fitness(temp.gnome, tsp);
+		population.push_back(temp);
 	}
 
 	/* 
@@ -322,7 +328,7 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 			}
 
 			// For every other selected member of the population
-			for (int i = 1; i < (population.size() / CHILD_PER_GNOME); i++)
+			for (int i = 1; i < (NODE_POPULATION_SIZE / CHILD_PER_GNOME); i++)
 			{
 				struct individual p1 = population[i];
 
