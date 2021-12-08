@@ -1,4 +1,25 @@
-Rank 0 OK!
-Rank 1 OK!
-OPT          533.648
+fitness: 22.5861
+2 3 0 1 4 
+fitness: 22.5861
+4 1 0 3 2 
+fitness: 7.54235
+1 0 2 3 4 
+fitness: 19.125
+1 2 3 0 4 
+fitness: 19.125
+4 0 1 2 3 
+fitness: 33.7807
+2 1 3 0 4 
+fitness: 40.9284
+0 3 4 1 2 
+fitness: 38.9361
+0 4 1 2 3 
+fitness: 20.2058
+4 0 2 3 1 
+fitness: 25.8886
+0 1 3 4 2 
+FITNESS
+22.5861 22.5861 
+GNOMES (5)
+2 3 0 1 4 4 1 0 3 2 
 OPT          533.648
