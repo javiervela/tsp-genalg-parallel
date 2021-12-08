@@ -20,6 +20,71 @@
 using namespace std;
 
 /**
+ * @brief Serialize <first_n> individuals of <population> into 2 vectors
+ * 
+ * @param population population to serialize
+ * @param first_n number of individuals to serialize
+ * @param gnome_v vector of integers where to serialize gnome of individuals
+ * @param fitness_v vector of float where to serialize fitness of individuals
+ */
+void serialize_population(std::vector<individual> &population, int first_n, int *gnome_v, float *fitness_v)
+{
+	gnome_v = new int[first_n * population[1].size() + 1];
+	fitness_v = new float[first_n];
+
+	int n = 1;
+	int g_v_i = 0;
+	int f_v_i = 0;
+
+	// Set gnome size at beggining of vector
+	gnome_v[g_v_i++] = population[1].size();
+
+	for (auto indi : population)
+	{
+		fitness_v[f_v_i++] = indi.fitness;
+		for (auto city : indi.gnome)
+		{
+			gnome_v[g_v_i++] = city;
+		}
+
+		// Only do <first_n> individuals in population
+		if (n == first_n)
+			break;
+		n++;
+	}
+}
+
+/**
+ * @brief Deserialize <n> individuals from 2 vectors into <population>
+ * 
+ * @param population population
+ * @param n number of indiiduals to deserialize
+ * @param gnome_v vector of integers to deserialize from gnome of individuals
+ * @param fitness_v vector of float to deserialize from fitness of individuals
+ */
+void deserialize_population(std::vector<individual> &population, int n, int *gnome_v, float *fitness_v)
+{
+	population.clear();
+
+	int g_v_i = 0;
+	int f_v_i = 0;
+
+	// Read size of gnomes
+	int size_gnome = gnome_v[g_v_i++];
+
+	// Deserialize vectors
+	for (int indi_i = 0; indi_i < n; indi_i++)
+	{
+		individual aux_ind;
+		aux_ind.fitness = fitness_v[f_v_i++];
+		for (int city_i = 0; city_i < size_gnome; city_i++)
+		{
+			aux_ind.gnome.push_back(gnome_v[g_v_i++]);
+		}
+	}
+}
+
+/**
  * @brief Function to return a random number from start and end
  *
  * @param start lower limit
