@@ -236,7 +236,7 @@ void print_best_gnome(int gen, int mpi_rank, std::vector<individual> &population
 	}
 	else if (!FINAL && LOG_LEVEL > 0)
 	{
-		ofs <<mpi_rank <<"-"<< gen << "          " << population[0].fitness << endl;
+		ofs << mpi_rank << "-" << gen << "          " << population[0].fitness << endl;
 	}
 	else if (!FINAL && LOG_LEVEL > 1)
 	{
@@ -258,7 +258,7 @@ void print_best_gnome(int gen, int mpi_rank, std::vector<individual> &population
  * @param POPULATION_SIZE Desired size of the populations
  * @param NUMBER_GENERATIONS Desired number of generations
  */
-void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER_GNOME, int MAX_NUMBER_MUTATIONS, int GEN_BATCH, int mpi_rank, int mpi_size, int mpi_root)
+void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER_GNOME, int MAX_NUMBER_MUTATIONS, int GEN_BATCH, int mpi_rank, int mpi_size, int mpi_root, std::ostream &oss)
 {
 	// Generation Number
 	int gen = 1;
@@ -335,7 +335,7 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 			// Order population based on fitness
 			sort(population.begin(), population.end(), less_than);
 		}
-		/* LOG */ print_best_gnome(gen + GEN_BATCH - 1, mpi_rank, population, cout);
+		/* LOG */ print_best_gnome(gen + GEN_BATCH - 1, mpi_rank, population, oss);
 	}
 
 	// Seriliaze first solution to send to reduce to best
@@ -352,14 +352,14 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 	serialize_population(population, first_n, gnome_v, fitness_v);
 
 	float *fitness_best_sol = new float[1];
-	cout << mpi_rank << ": reduced " << fitness_v[0] << endl;
+	oss << mpi_rank << ": reduced " << fitness_v[0] << endl;
 
 	MPI_Reduce(fitness_v, fitness_best_sol, 1, MPI_FLOAT, MPI_MIN, mpi_root, MPI_COMM_WORLD);
 
 	if (mpi_rank == mpi_root)
 	{
-		cout << "ROOT: reduced " << fitness_best_sol[0] << endl;
+		oss << "ROOT: reduced " << fitness_best_sol[0] << endl;
 	}
 
-	/* LOG */ //print_best_gnome(-1, population, cout);
+	/* LOG */ //print_best_gnome(-1, population, oss);
 }

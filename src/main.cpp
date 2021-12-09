@@ -47,9 +47,14 @@ int main(int argc, char **argv)
 	ifstream probfs, solfs;
 	parseArgs(argc, argv, probfs, solfs);
 	Map tsp = readProblem(probfs);
-	GenAlg(tsp, POPULATION_SIZE, NUMBER_GENERATIONS, CHILD_PER_GNOME, MAX_NUMBER_MUTATIONS, GEN_BATCH, mpi_rank, mpi_size, mpi_root);
+	GenAlg(tsp, POPULATION_SIZE, NUMBER_GENERATIONS, CHILD_PER_GNOME, MAX_NUMBER_MUTATIONS, GEN_BATCH, mpi_rank, mpi_size, mpi_root, std::cout);
 	readSolution(solfs, tsp);
-	cout << "OPT          " << tsp.optimalCost << endl;
+
+	if (mpi_rank == mpi_root)
+	{
+		cout << "OPT"
+			 << "          " << tsp.optimalCost << endl;
+	}
 
 	MPI_Finalize();
 
