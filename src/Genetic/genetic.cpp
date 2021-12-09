@@ -29,7 +29,7 @@ using namespace std;
  */
 void serialize_population(std::vector<individual> &population, int first_n, int *&gnome_v, float *&fitness_v)
 {
-	gnome_v = new int[first_n * population[1].gnome.size() + 1];
+	gnome_v = new int[first_n * population[0].gnome.size() + 1];
 	fitness_v = new float[first_n];
 
 	int n = 1;
@@ -37,7 +37,7 @@ void serialize_population(std::vector<individual> &population, int first_n, int 
 	int f_v_i = 0;
 
 	// Set gnome size at beggining of vector
-	gnome_v[g_v_i++] = population[1].gnome.size();
+	gnome_v[g_v_i++] = population[0].gnome.size();
 
 	for (auto indi : population)
 	{
@@ -223,20 +223,20 @@ void print_generation(int gen, std::vector<individual> &population)
  * @param gen Generation number
  * @param population Vector of individuals, EXPECTED to be order by fitness
  */
-void print_best_gnome(int gen, std::vector<individual> &population, std::ostream &ofs)
+void print_best_gnome(int gen, int mpi_rank, std::vector<individual> &population, std::ostream &ofs)
 {
 	bool FINAL = gen < 0;
 	if (FINAL && LOG_LEVEL > 1)
 	{
 		ofs << "Generation FINAL \n";
 		ofs << "BEST GNOME	 FITNESS VALUE\n";
-		for (int c : population[1].gnome)
+		for (int c : population[0].gnome)
 			ofs << c << ",";
-		ofs << " " << population[1].fitness << endl;
+		ofs << " " << population[0].fitness << endl;
 	}
 	else if (!FINAL && LOG_LEVEL > 0)
 	{
-		ofs << gen << "          " << population[1].fitness << endl;
+		ofs <<mpi_rank <<"-"<< gen << "          " << population[0].fitness << endl;
 	}
 	else if (!FINAL && LOG_LEVEL > 1)
 	{
@@ -244,10 +244,10 @@ void print_best_gnome(int gen, std::vector<individual> &population, std::ostream
 
 		ofs << "BEST GNOME	 FITNESS VALUE\n";
 
-		for (int c : population[1].gnome)
+		for (int c : population[0].gnome)
 			ofs << c << ",";
 
-		ofs << " " << population[1].fitness << endl;
+		ofs << " " << population[0].fitness << endl;
 	}
 }
 
@@ -294,18 +294,6 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 		population.push_back(temp);
 	}
 
-	/* 
-	int first_n = 2;
-	
-	int *gnome_v;
-	int size_gnome_v = first_n * test_dimension + 1;
-	
-	float *fitness_v;
-	int size_fitness_v = first_n;
-
-	serialize_population(population, first_n, gnome_v, fitness_v); 
-	*/
-
 	/* DEBUG */ // print_best_gnome(gen, population);
 
 	// Order population based on fitness
@@ -324,7 +312,7 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 			// The fittest does not mutate
 			for (int i = 0; i < CHILD_PER_GNOME; i++)
 			{
-				new_population.push_back(population[1]);
+				new_population.push_back(population[0]);
 			}
 
 			// For every other selected member of the population
@@ -355,7 +343,31 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 			// Order population based on fitness
 			sort(population.begin(), population.end(), less_than);
 		}
-		/* LOG */ print_best_gnome(gen + GEN_BATCH - 1, population, cout);
+		/* LOG */ print_best_gnome(gen + GEN_BATCH - 1, mpi_rank, population, cout);
 	}
-	/* LOG */ print_best_gnome(-1, population, cout);
+
+	// Seriliaze first solution to send to reduce to best
+	int first_n = 1;
+
+	int *gnome_v;
+	int size_gnome_v = first_n * tsp.dimension + 1;
+
+	float *fitness_v;
+	int size_fitness_v = first_n;
+
+	// TODO is it necessary to serialize the gnome for the last reduce??
+	// We only need to print the best solution
+	serialize_population(population, first_n, gnome_v, fitness_v);
+
+	float *fitness_best_sol = new float[1];
+	cout << mpi_rank << ": reduced " << fitness_v[0] << endl;
+
+	MPI_Reduce(fitness_v, fitness_best_sol, 1, MPI_FLOAT, MPI_MIN, mpi_root, MPI_COMM_WORLD);
+
+	if (mpi_rank == mpi_root)
+	{
+		cout << "ROOT: reduced " << fitness_best_sol[0] << endl;
+	}
+
+	/* LOG */ //print_best_gnome(-1, population, cout);
 }
