@@ -258,16 +258,8 @@ void print_best_gnome(int gen, int mpi_rank, std::vector<individual> &population
  * @param POPULATION_SIZE Desired size of the populations
  * @param NUMBER_GENERATIONS Desired number of generations
  */
-void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER_GNOME, int MAX_NUMBER_MUTATIONS, int GEN_BATCH)
+void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER_GNOME, int MAX_NUMBER_MUTATIONS, int GEN_BATCH, int mpi_rank, int mpi_size, int mpi_root)
 {
-
-	int mpi_rank, mpi_size;
-	int mpi_root = 0;
-	MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-	MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-
-	srand(time(NULL) + mpi_rank);
-
 	// Generation Number
 	int gen = 1;
 

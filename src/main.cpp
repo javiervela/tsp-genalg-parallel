@@ -37,10 +37,17 @@ int main(int argc, char **argv)
 
 	MPI_Init(&argc, &argv);
 
+	int mpi_rank, mpi_size;
+	int mpi_root = 0;
+	MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+	srand(time(NULL) + mpi_rank);
+
 	ifstream probfs, solfs;
 	parseArgs(argc, argv, probfs, solfs);
 	Map tsp = readProblem(probfs);
-	GenAlg(tsp, POPULATION_SIZE, NUMBER_GENERATIONS, CHILD_PER_GNOME, MAX_NUMBER_MUTATIONS, GEN_BATCH);
+	GenAlg(tsp, POPULATION_SIZE, NUMBER_GENERATIONS, CHILD_PER_GNOME, MAX_NUMBER_MUTATIONS, GEN_BATCH, mpi_rank, mpi_size, mpi_root);
 	readSolution(solfs, tsp);
 	cout << "OPT          " << tsp.optimalCost << endl;
 
