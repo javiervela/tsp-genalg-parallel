@@ -1,3 +1,14 @@
+/**
+ * @file tsplib.h
+ * @author Annihil (https://github.com/Annihil/Little-TSP-solver/) & Javier Vela
+ * @brief Header file for reading TSPLIB problems and other aditional functionality
+ * @version 0.1
+ * @date 2021-12-03
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+
 #ifndef TSPLIB_H
 #define TSPLIB_H
 

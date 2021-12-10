@@ -1,7 +1,24 @@
+/**
+ * @file tsplib.cpp
+ * @author Annihil (https://github.com/Annihil/Little-TSP-solver/) & Javier Vela
+ * @brief Source file for reading TSPLIB problems and other aditional functionality
+ * @version 0.1
+ * @date 2021-12-03
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+
 #include "tsplib.h"
 
 using namespace std;
 
+/**
+ * @brief Read TSPLIB problem into Map struct
+ * 
+ * @param inputFile input file stream 
+ * @return Map Problem information
+ */
 Map readProblem(ifstream &inputFile)
 {
     Map tsp;
@@ -51,7 +68,7 @@ Map readProblem(ifstream &inputFile)
         }
     }
 
-   /*  for (auto line : tsp.matrix)
+    /*  for (auto line : tsp.matrix)
     {
         for (auto city : line)
         {
@@ -63,6 +80,12 @@ Map readProblem(ifstream &inputFile)
     return tsp;
 }
 
+/**
+ * @brief Read TSPLIB solution into Map struct
+ * 
+ * @param inputFile input file stream
+ * @param tsp Map struct where to read solution
+ */
 void readSolution(ifstream &inputFile, Map &tsp)
 {
     const char delimiter = ':';
@@ -125,6 +148,12 @@ void readSolution(ifstream &inputFile, Map &tsp)
     return;
 }
 
+/**
+ * @brief Trimp string
+ * 
+ * @param s string to be trimmed
+ * @return string trimmed
+ */
 string trim(string s)
 {
     s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
@@ -132,7 +161,16 @@ string trim(string s)
     return s;
 }
 
-// Check and store the value of each keyword
+/**
+ * @brief  Check and store the value of each keyword
+ * 
+ * @param keyword 
+ * @param value 
+ * @param name name of TSPLIB problem
+ * @param dimension dimension of TSPLIB problem
+ * @return true if a known keyword has been detected
+ * @return false if a unknow keyword has been detected
+ */
 bool checkKeyword(string keyword, string value, string &name, int &dimension)
 {
     if (keyword == "NAME")
@@ -160,18 +198,14 @@ bool checkKeyword(string keyword, string value, string &name, int &dimension)
     return true;
 }
 
-// Dislay the solution on the standard output
-void printSolution(Map &tsp, float optimalTourSize, float optimalTourCost)
-{
-    time_t now = time(0);
-    tm *localtm = localtime(&now);
-
-    cout << "NAME : " << tsp.name << "." << optimalTourSize << ".tour" << endl;
-    cout << "COMMENT : Lenght = " << optimalTourCost << ". Found by John D.C. Little " << asctime(localtm);
-    cout << "TYPE : TOUR" << endl;
-    cout << "DIMENSION : " << optimalTourSize << endl;
-}
-
+/**
+ * @brief Get a parameter out of command line arguments
+ * 
+ * @param cmd option to be parsed
+ * @param argc 
+ * @param argv 
+ * @return string value of the option
+ */
 string getParam(string cmd, int argc, char **argv)
 {
     for (int i = 0; i < argc; i++)
@@ -184,6 +218,14 @@ string getParam(string cmd, int argc, char **argv)
     return "";
 }
 
+/**
+ * @brief Parse command line options
+ * 
+ * @param argc 
+ * @param argv 
+ * @param problemFileStream references to input file stream for problem
+ * @param solutionFileStream references to input file stream for solution
+ */
 void parseArgs(int argc, char **argv, std::ifstream &problemFileStream, std::ifstream &solutionFileStream)
 {
     string inputParam = getParam("-i", argc, argv);
