@@ -108,6 +108,12 @@ int rand_num(int start, int end)
  * @param V size of map
  * @return Mutated GNOME is a string with a random interchange of two genes to create variation in species
  */
+
+// TODO add <thread id> and <thread total num> to paralleliza mutation with threads
+/* calculate 
+int begin = (<size gnome> * <thread id>) / <thread total num>;
+int end = ((<size gnome> * (<thread id> + 1)) / <thread total num>) - 1; 
+ */
 std::vector<int> mutate_gnome(std::vector<int> gnome, int V)
 {
 	bool mutated = false;
@@ -328,6 +334,8 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 					// Random number of mutations for child
 					int number_mutations = ((double)rand() / (double)RAND_MAX) * (MAX_NUMBER_MUTATIONS + 1);
 					struct individual paux = p1;
+
+					// TODO index is passed to the mutate to ensure 2 threads dont get the same city in the gnome and parallelize mutation
 					for (int i = 0; i < number_mutations; i++)
 					{
 						paux.gnome = mutate_gnome(paux.gnome, tsp.dimension);
