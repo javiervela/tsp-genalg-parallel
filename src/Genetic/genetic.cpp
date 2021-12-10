@@ -102,23 +102,6 @@ int rand_num(int start, int end)
 }
 
 /**
- * @brief Function to check if the character has already occurred in the string
- *
- * @param s string to be checked
- * @param ch character to be checked for
- * @return ch appears in s
- */
-bool repeat(string s, char ch)
-{
-	for (int i = 0; i < s.size(); i++)
-	{
-		if (s[i] == ch)
-			return true;
-	}
-	return false;
-}
-
-/**
  * @brief Function to return a mutated GNOME
  *
  * @param gnome initial gnome
@@ -220,36 +203,37 @@ void print_generation(int gen, std::vector<individual> &population)
 }
 
 /**
- * @brief Print gnome with best fitness in the population for a certain generation
+ * @brief Print gnome with best fitness in the population for a certain generation, Login levels control verbosity of output
  *
  * @param gen Generation number
  * @param population Vector of individuals, EXPECTED to be order by fitness
+ * @param oss output stream
  */
-void print_best_gnome(int gen, int mpi_rank, std::vector<individual> &population, std::ostream &ofs)
+void print_best_gnome(int gen, int mpi_rank, std::vector<individual> &population, std::ostream &oss)
 {
 	bool FINAL = gen < 0;
 	if (FINAL && LOG_LEVEL > 1)
 	{
-		ofs << "Generation FINAL \n";
-		ofs << "BEST GNOME	 FITNESS VALUE\n";
+		oss << "Generation FINAL \n";
+		oss << "BEST GNOME	 FITNESS VALUE\n";
 		for (int c : population[0].gnome)
-			ofs << c << ",";
-		ofs << " " << population[0].fitness << endl;
+			oss << c << ",";
+		oss << " " << population[0].fitness << endl;
 	}
 	else if (!FINAL && LOG_LEVEL > 0)
 	{
-		ofs << mpi_rank << "-" << gen << "          " << population[0].fitness << endl;
+		oss << mpi_rank << "-" << gen << "          " << population[0].fitness << endl;
 	}
 	else if (!FINAL && LOG_LEVEL > 1)
 	{
-		ofs << "Generation " << gen << " \n";
+		oss << "Generation " << gen << " \n";
 
-		ofs << "BEST GNOME	 FITNESS VALUE\n";
+		oss << "BEST GNOME	 FITNESS VALUE\n";
 
 		for (int c : population[0].gnome)
-			ofs << c << ",";
+			oss << c << ",";
 
-		ofs << " " << population[0].fitness << endl;
+		oss << " " << population[0].fitness << endl;
 	}
 }
 
@@ -259,6 +243,23 @@ void print_best_gnome(int gen, int mpi_rank, std::vector<individual> &population
  * @param tsp TSP Problem
  * @param POPULATION_SIZE Desired size of the populations
  * @param NUMBER_GENERATIONS Desired number of generations
+ */
+
+/**
+ * @brief Execute genetic algorithm
+ *
+ * @param tsp TSP Problem
+ * @param POPULATION_SIZE Desired size of the populations
+ * @param NUMBER_GENERATIONS Desired number of generations
+ * @param CHILD_PER_GNOME Number of children each individual has through mutations each iteration
+ * @param MAX_NUMBER_MUTATIONS Maximum number of mutations per gnome 
+ * @param GEN_BATCH Number of generations for each processor before logging (and synchronizing)
+ * @param mpi_rank MPI rank of current node
+ * @param mpi_size MPI size
+ * @param mpi_root MPI rank of the root node
+ * @param oss output stream
+ * @param best_fitness_sol reference to return the best solution found by node
+ * @param execution_time reference to return execution time in milliseconds
  */
 void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER_GNOME, int MAX_NUMBER_MUTATIONS, int GEN_BATCH, int mpi_rank, int mpi_size, int mpi_root, std::ostream &oss, float &best_fitness_sol, microseconds &execution_time)
 {
@@ -342,6 +343,8 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 			sort(population.begin(), population.end(), less_than);
 		}
 		/* LOG */ print_best_gnome(gen + GEN_BATCH - 1, mpi_rank, population, oss);
+
+		// TODO share between all of them the best individuals and start from the same population
 	}
 
 	auto stop = high_resolution_clock::now();
