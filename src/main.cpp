@@ -62,6 +62,8 @@ int main(int argc, char **argv)
 	cout << "T-" << mpi_rank << "-"
 		 << "          " << execution_time.count() << endl;
 
+	MPI_Barrier(MPI_COMM_WORLD);
+
 	if (mpi_rank == mpi_root)
 	{
 		cout << "OPT"
