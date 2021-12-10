@@ -14,7 +14,10 @@
 #endif
 
 #include <cstring>
+#include <chrono>
 #include "tsplib.h"
+
+using namespace std::chrono;
 
 /// Structure of a GNOME string defines the path traversed by the salesman while the fitness value of the path is stored in an integer
 struct individual
@@ -23,4 +26,4 @@ struct individual
 	float fitness;
 };
 
-void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER_GNOME, int MAX_NUMBER_MUTATIONS, int GEN_BATCH, int mpi_rank, int mpi_size, int mpi_root, std::ostream &oss);
+void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER_GNOME, int MAX_NUMBER_MUTATIONS, int GEN_BATCH, int mpi_rank, int mpi_size, int mpi_root, std::ostream &oss, float &best_fitness_sol, microseconds &execution_time);

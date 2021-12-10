@@ -14,10 +14,12 @@
 #include <cmath>
 #include <iostream>
 #include <algorithm>
+#include <chrono>
 #include "genetic.h"
 #include "mpi.h"
 
 using namespace std;
+using namespace std::chrono;
 
 /**
  * @brief Serialize <first_n> individuals of <population> into 2 vectors
@@ -258,12 +260,13 @@ void print_best_gnome(int gen, int mpi_rank, std::vector<individual> &population
  * @param POPULATION_SIZE Desired size of the populations
  * @param NUMBER_GENERATIONS Desired number of generations
  */
-void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER_GNOME, int MAX_NUMBER_MUTATIONS, int GEN_BATCH, int mpi_rank, int mpi_size, int mpi_root, std::ostream &oss)
+void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER_GNOME, int MAX_NUMBER_MUTATIONS, int GEN_BATCH, int mpi_rank, int mpi_size, int mpi_root, std::ostream &oss, float &best_fitness_sol, microseconds &execution_time)
 {
 	// Generation Number
 	int gen = 1;
 
 	vector<struct individual> population;
+	vector<struct individual> new_population;
 	struct individual temp;
 
 	// Each node initialize its particles
@@ -291,12 +294,15 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 	// Order population based on fitness
 	sort(population.begin(), population.end(), less_than);
 
+	/* LOG */ print_best_gnome(1, mpi_rank, population, oss);
+
+	auto start = high_resolution_clock::now();
+
 	// Iteration to perform population crossing and gene mutation (each generation)
 	for (gen; gen <= NUMBER_GENERATIONS; gen += GEN_BATCH)
 	{
 		for (int gen_batch = gen; gen_batch < gen + GEN_BATCH; gen_batch++)
 		{
-			vector<struct individual> new_population;
 
 			/* SELECTION */
 			// POPULATION_SIZE / CHILD_PER_GNOME gnomes are selected to breed next generation
@@ -338,6 +344,9 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 		/* LOG */ print_best_gnome(gen + GEN_BATCH - 1, mpi_rank, population, oss);
 	}
 
+	auto stop = high_resolution_clock::now();
+	execution_time = duration_cast<microseconds>(stop - start);
+
 	// Seriliaze first solution to send to reduce to best
 	int first_n = 1;
 
@@ -351,15 +360,12 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 	// We only need to print the best solution
 	serialize_population(population, first_n, gnome_v, fitness_v);
 
-	float *fitness_best_sol = new float[1];
-	oss << mpi_rank << ": reduced " << fitness_v[0] << endl;
+	float *best_fitness_sol_v = new float[1];
 
-	MPI_Reduce(fitness_v, fitness_best_sol, 1, MPI_FLOAT, MPI_MIN, mpi_root, MPI_COMM_WORLD);
+	MPI_Reduce(fitness_v, best_fitness_sol_v, 1, MPI_FLOAT, MPI_MIN, mpi_root, MPI_COMM_WORLD);
 
 	if (mpi_rank == mpi_root)
 	{
-		oss << "ROOT: reduced " << fitness_best_sol[0] << endl;
+		best_fitness_sol = best_fitness_sol_v[0];
 	}
-
-	/* LOG */ //print_best_gnome(-1, population, oss);
 }
