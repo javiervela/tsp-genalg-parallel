@@ -21,15 +21,15 @@ using namespace std;
 using namespace std::chrono;
 
 /// Initial population size for the algorithm
-#define POPULATION_SIZE 10000
+#define POPULATION_SIZE 10
 /// Number of child per gnome in breeding (must be a divisors of POPULATION_SIZE)
-#define CHILD_PER_GNOME 100
+#define CHILD_PER_GNOME 1
 /// Maximum number of mutations per child
-#define MAX_NUMBER_MUTATIONS 25
+#define MAX_NUMBER_MUTATIONS 10
 /// Number of generations for the algorithm
-#define NUMBER_GENERATIONS 1000
+#define NUMBER_GENERATIONS 100
 /// Number of generations computed per batch (before synchronizing all processors) (must be a divisors of NUMBER_GENERATIONS)
-#define GEN_BATCH 25
+#define GEN_BATCH 1
 
 /**
  * @brief Main procedure
@@ -59,8 +59,8 @@ int main(int argc, char **argv)
 
 	readSolution(solfs, tsp);
 
-	cout << "T-" << mpi_rank << "-"
-		 << "          " << execution_time.count() << endl;
+	cout << "T-" << mpi_rank << "          " << execution_time.count() << endl;
+	cout << flush;
 
 	MPI_Barrier(MPI_COMM_WORLD);
 

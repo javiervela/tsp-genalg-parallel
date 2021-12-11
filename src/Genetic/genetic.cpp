@@ -28,18 +28,16 @@ using namespace std::chrono;
  * @param first_n number of individuals to serialize
  * @param gnome_v vector of integers where to serialize gnome of individuals
  * @param fitness_v vector of float where to serialize fitness of individuals
+ * @param size_gnome number of cities in each gnome
  */
-void serialize_population(std::vector<individual> &population, int first_n, int *&gnome_v, float *&fitness_v)
+void serialize_population(std::vector<individual> &population, int first_n, int *&gnome_v, float *&fitness_v, int size_gnome)
 {
-	gnome_v = new int[first_n * population[0].gnome.size() + 1];
+	gnome_v = new int[first_n * size_gnome + 1];
 	fitness_v = new float[first_n];
 
 	int n = 1;
 	int g_v_i = 0;
 	int f_v_i = 0;
-
-	// Set gnome size at beggining of vector
-	gnome_v[g_v_i++] = population[0].gnome.size();
 
 	for (auto indi : population)
 	{
@@ -63,16 +61,14 @@ void serialize_population(std::vector<individual> &population, int first_n, int 
  * @param n number of indiiduals to deserialize
  * @param gnome_v vector of integers to deserialize from gnome of individuals
  * @param fitness_v vector of float to deserialize from fitness of individuals
+ * @param size_gnome number of cities in each gnome
  */
-void deserialize_population(std::vector<individual> &population, int n, int *gnome_v, float *fitness_v)
+void deserialize_population(std::vector<individual> &population, int n, int *gnome_v, float *fitness_v, int size_gnome)
 {
 	//population.clear();
 
 	int g_v_i = 0;
 	int f_v_i = 0;
-
-	// Read size of gnomes
-	int size_gnome = gnome_v[g_v_i++];
 
 	individual aux_ind;
 	// Deserialize vectors
@@ -85,6 +81,9 @@ void deserialize_population(std::vector<individual> &population, int n, int *gno
 		}
 		population.push_back(aux_ind);
 	}
+
+	delete gnome_v;
+	delete fitness_v;
 }
 
 /**
@@ -249,14 +248,6 @@ void print_best_gnome(int gen, int mpi_rank, std::vector<individual> &population
  * @param tsp TSP Problem
  * @param POPULATION_SIZE Desired size of the populations
  * @param NUMBER_GENERATIONS Desired number of generations
- */
-
-/**
- * @brief Execute genetic algorithm
- *
- * @param tsp TSP Problem
- * @param POPULATION_SIZE Desired size of the populations
- * @param NUMBER_GENERATIONS Desired number of generations
  * @param CHILD_PER_GNOME Number of children each individual has through mutations each iteration
  * @param MAX_NUMBER_MUTATIONS Maximum number of mutations per gnome 
  * @param GEN_BATCH Number of generations for each processor before logging (and synchronizing)
@@ -272,15 +263,14 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 	// Generation Number
 	int gen = 1;
 
-	vector<struct individual> population;
-	vector<struct individual> new_population;
+	vector<struct individual> population, new_population, intermediate_population;
 	struct individual temp;
 
 	// Each node initialize its particles
 	int NODE_POPULATION_SIZE;
 	if (mpi_rank == mpi_root)
 	{
-		NODE_POPULATION_SIZE = POPULATION_SIZE / mpi_size + (POPULATION_SIZE % (POPULATION_SIZE / mpi_size));
+		NODE_POPULATION_SIZE = POPULATION_SIZE / mpi_size + (POPULATION_SIZE - ((POPULATION_SIZE / mpi_size) * mpi_size));
 	}
 	else
 	{
@@ -293,6 +283,7 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 	{
 		temp.gnome = create_gnome(tsp.dimension, initial_city);
 		temp.fitness = calculate_fitness(temp.gnome, tsp);
+		cout << "temp fitness: " << temp.fitness << endl;
 		population.push_back(temp);
 	}
 
@@ -305,6 +296,12 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 
 	auto start = high_resolution_clock::now();
 
+	/* DEBUG */ cout << mpi_rank << " node pop size: " << NODE_POPULATION_SIZE << endl;
+	/* DEBUG  */ for (auto a : population)
+	/* DEBUG  */ {
+		/* DEBUG  */ cout << mpi_rank << ":" << a.fitness << endl;
+	/* DEBUG  */}
+
 	// Iteration to perform population crossing and gene mutation (each generation)
 	for (gen; gen <= NUMBER_GENERATIONS; gen += GEN_BATCH)
 	{
@@ -312,7 +309,7 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 		{
 
 			/* SELECTION */
-			// POPULATION_SIZE / CHILD_PER_GNOME gnomes are selected to breed next generation
+			// NODE_POPULATION_SIZE / CHILD_PER_GNOME gnomes are selected to breed next generation
 
 			// The fittest does not mutate
 			for (int i = 0; i < CHILD_PER_GNOME; i++)
@@ -353,6 +350,58 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 		/* LOG */ print_best_gnome(gen + GEN_BATCH - 1, mpi_rank, population, oss);
 
 		// TODO share between all of them the best individuals and start from the same population
+
+		int *gnome_v;
+		int size_gnome_v = NODE_POPULATION_SIZE * tsp.dimension;
+
+		float *fitness_v;
+		int size_fitness_v = NODE_POPULATION_SIZE;
+
+		// TODO is it necessary to serialize the gnome for the last reduce??
+		// We only need to print the best solution
+		serialize_population(population, NODE_POPULATION_SIZE, gnome_v, fitness_v, tsp.dimension);
+
+		float *received_fitness_v;
+		int *received_gnome_v;
+
+		if (mpi_rank == mpi_root)
+		{
+			received_gnome_v = new int[POPULATION_SIZE * tsp.dimension];
+			received_fitness_v = new float[POPULATION_SIZE];
+		}
+
+		for (auto a : population)
+		{
+			cout << mpi_rank << "-" << a.fitness << endl;
+		}
+
+		cout << mpi_rank << " entering first gather" << endl;
+		MPI_Gather(fitness_v, NODE_POPULATION_SIZE, MPI_FLOAT, received_fitness_v, POPULATION_SIZE, MPI_FLOAT, mpi_root, MPI_COMM_WORLD);
+
+		cout << mpi_rank << " entering second gather" << endl;
+		MPI_Gather(gnome_v, NODE_POPULATION_SIZE * tsp.dimension, MPI_INT, received_gnome_v, POPULATION_SIZE * tsp.dimension, MPI_INT, mpi_root, MPI_COMM_WORLD);
+
+		cout << "sent -> " << mpi_rank << endl;
+
+		if (mpi_rank == mpi_root)
+		{
+			intermediate_population.clear();
+			deserialize_population(intermediate_population, POPULATION_SIZE, received_gnome_v, received_fitness_v, tsp.dimension);
+			print_best_gnome(100, mpi_rank, intermediate_population, oss);
+			cout << "intermidiate" << endl;
+			for (auto a : intermediate_population)
+			{
+				cout << a.fitness << endl;
+			}
+		}
+
+		if (mpi_rank == mpi_root)
+		{
+			delete received_gnome_v;
+			delete received_fitness_v;
+		}
+
+		return;
 	}
 
 	auto stop = high_resolution_clock::now();
@@ -362,14 +411,14 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 	int first_n = 1;
 
 	int *gnome_v;
-	int size_gnome_v = first_n * tsp.dimension + 1;
+	int size_gnome_v = first_n * tsp.dimension;
 
 	float *fitness_v;
 	int size_fitness_v = first_n;
 
 	// TODO is it necessary to serialize the gnome for the last reduce??
 	// We only need to print the best solution
-	serialize_population(population, first_n, gnome_v, fitness_v);
+	serialize_population(population, first_n, gnome_v, fitness_v, tsp.dimension);
 
 	float *best_fitness_sol_v = new float[1];
 
@@ -379,4 +428,7 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 	{
 		best_fitness_sol = best_fitness_sol_v[0];
 	}
+
+	delete gnome_v;
+	delete fitness_v;
 }
