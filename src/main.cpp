@@ -21,15 +21,15 @@ using namespace std;
 using namespace std::chrono;
 
 /// Initial population size for the algorithm
-#define POPULATION_SIZE 10
+#define POPULATION_SIZE 1000
 /// Number of child per gnome in breeding (must be a divisors of POPULATION_SIZE)
-#define CHILD_PER_GNOME 1
+#define CHILD_PER_GNOME 10
 /// Maximum number of mutations per child
 #define MAX_NUMBER_MUTATIONS 10
 /// Number of generations for the algorithm
 #define NUMBER_GENERATIONS 100
 /// Number of generations computed per batch (before synchronizing all processors) (must be a divisors of NUMBER_GENERATIONS)
-#define GEN_BATCH 1
+#define GEN_BATCH 10
 
 /**
  * @brief Main procedure
