@@ -43,13 +43,14 @@ legendList = []
 # plotting the points
 for index, gen_node in enumerate(gen_gnome):
 	plt.plot(gen_num, gen_node, color=color[index], linewidth = 1, marker='.', markerfacecolor=color[index], markersize=2)
-	legendList.append("nodo " + str(index) + ": " + str(times[index]/1000000) +"s" )
+	exectime = times[index]/1000000
+	legendList.append("node " + str(index) + f": {exectime:.2f} s" )
 
 plt.plot(gen_num[-1], opt_sol, color='yellow',marker='*', markersize=10, markeredgecolor='black')
-legendList.append("opt. sol.")
+legendList.append("opt. sol.:"+ str(opt_sol))
 
 plt.plot(gen_num[-1], subopt_sol, color='pink',marker='X', markersize=10, markeredgecolor='black')
-legendList.append("found sol.")
+legendList.append("found sol.:"+ str(subopt_sol))
 
 plt.legend(legendList)
 
