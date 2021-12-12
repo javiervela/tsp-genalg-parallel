@@ -214,6 +214,14 @@ string getParam(string cmd, int argc, char **argv)
         {
             return argv[i + 1];
         }
+        if (argv[i] == "-h")
+        {
+            return "help";
+        }
+        if (argv[i] == "-S")
+        {
+            return "sync";
+        }
     }
     return "";
 }
@@ -226,14 +234,92 @@ string getParam(string cmd, int argc, char **argv)
  * @param problemFileStream references to input file stream for problem
  * @param solutionFileStream references to input file stream for solution
  */
-void parseArgs(int argc, char **argv, std::ifstream &problemFileStream, std::ifstream &solutionFileStream)
+void parseArgs(int argc, char **argv, std::ifstream &problemFileStream, std::ifstream &solutionFileStream, int &POPULATION_SIZE, int &CHILD_PER_GNOME, int &MAX_NUMBER_MUTATIONS, int &NUMBER_GENERATIONS, int &GEN_BATCH, bool &SYNC_BATCH)
 {
+
+    string helpParam = getParam("-h", argc, argv);
+    if (helpParam == "help")
+    {
+        cout << "E-i <INPUT_FILE>"
+             << endl
+             << "-P <POPULATION_SIZE>"
+             << endl
+             << "-C <CHILD_PER_GNOME>"
+             << endl
+             << "-M <MAX_NUMBER_MUTATIONS>"
+             << endl
+             << "-G <NUMBER_GENERATIONS>"
+             << endl
+             << "-B <GEN_BATCH>"
+             << endl
+             << "-S <SYNC_BATCH>" << endl;
+        exit(0);
+    }
+
     string inputParam = getParam("-i", argc, argv);
     if (inputParam == "")
     {
-        cout << "Error : -i parameter not detected" << endl;
+        cout << "Error : -i <INPUT_FILE> parameter not detected" << endl;
         exit(-1);
     }
+
+    string POPULATION_SIZE_string = getParam("-P", argc, argv);
+    if (POPULATION_SIZE_string == "")
+    {
+        cout << "Error : -P <POPULATION_SIZE> parameter not detected" << endl;
+        exit(-1);
+    }
+    else
+    {
+        POPULATION_SIZE = stoi(POPULATION_SIZE_string);
+    }
+
+    string CHILD_PER_GNOME_string = getParam("-C", argc, argv);
+    if (CHILD_PER_GNOME_string == "")
+    {
+        cout << "Error : -C <CHILD_PER_GNOME> parameter not detected" << endl;
+        exit(-1);
+    }
+    else
+    {
+        CHILD_PER_GNOME = stoi(CHILD_PER_GNOME_string);
+    }
+
+    string MAX_NUMBER_MUTATIONS_string = getParam("-M", argc, argv);
+    if (MAX_NUMBER_MUTATIONS_string == "")
+    {
+        cout << "Error : -M <MAX_NUMBER_MUTATIONS> parameter not detected" << endl;
+        exit(-1);
+    }
+    else
+    {
+        MAX_NUMBER_MUTATIONS = stoi(MAX_NUMBER_MUTATIONS_string);
+    }
+
+    string NUMBER_GENERATIONS_string = getParam("-G", argc, argv);
+    if (NUMBER_GENERATIONS_string == "")
+    {
+        cout << "Error : -G <NUMBER_GENERATIONS> parameter not detected" << endl;
+        exit(-1);
+    }
+    else
+    {
+        NUMBER_GENERATIONS = stoi(NUMBER_GENERATIONS_string);
+    }
+
+    string GEN_BATCH_string = getParam("-B", argc, argv);
+    if (GEN_BATCH_string == "")
+    {
+        cout << "Error : -B <GEN_BATCH> parameter not detected" << endl;
+        exit(-1);
+    }
+    else
+    {
+        GEN_BATCH = stoi(GEN_BATCH_string);
+    }
+
+    string SYNC_BATCH_string = getParam("-S", argc, argv);
+    SYNC_BATCH = SYNC_BATCH_string == "sync";
 
     string problemFile = inputParam + ".tsp";
     problemFileStream = ifstream(problemFile);

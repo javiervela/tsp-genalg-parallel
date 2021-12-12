@@ -20,16 +20,18 @@
 using namespace std;
 using namespace std::chrono;
 
-/// Initial population size for the algorithm
-#define POPULATION_SIZE 1000
+/* /// Initial population size for the algorithm
+#define POPULATION_SIZE 10000
 /// Number of child per gnome in breeding (must be a divisors of POPULATION_SIZE)
 #define CHILD_PER_GNOME 10
 /// Maximum number of mutations per child
-#define MAX_NUMBER_MUTATIONS 25
+#define MAX_NUMBER_MUTATIONS 10
 /// Number of generations for the algorithm
 #define NUMBER_GENERATIONS 1000
 /// Number of generations computed per batch (before synchronizing all processors) (must be a divisors of NUMBER_GENERATIONS)
 #define GEN_BATCH 10
+/// Enable synchronization between batches
+#define SYNC_BATCH 0 */
 
 /**
  * @brief Main procedure
@@ -49,13 +51,19 @@ int main(int argc, char **argv)
 	srand(time(NULL) + mpi_rank);
 
 	ifstream probfs, solfs;
-	parseArgs(argc, argv, probfs, solfs);
+	int POPULATION_SIZE,
+		CHILD_PER_GNOME,
+		MAX_NUMBER_MUTATIONS,
+		NUMBER_GENERATIONS,
+		GEN_BATCH;
+	bool SYNC_BATCH;
+	parseArgs(argc, argv, probfs, solfs, POPULATION_SIZE, CHILD_PER_GNOME, MAX_NUMBER_MUTATIONS, NUMBER_GENERATIONS, GEN_BATCH, SYNC_BATCH);
 
 	microseconds execution_time;
 	float best_fitness_sol;
 
 	Map tsp = readProblem(probfs);
-	GenAlg(tsp, POPULATION_SIZE, NUMBER_GENERATIONS, CHILD_PER_GNOME, MAX_NUMBER_MUTATIONS, GEN_BATCH, mpi_rank, mpi_size, mpi_root, std::cout, best_fitness_sol, execution_time);
+	GenAlg(tsp, POPULATION_SIZE, NUMBER_GENERATIONS, CHILD_PER_GNOME, MAX_NUMBER_MUTATIONS, GEN_BATCH, mpi_rank, mpi_size, mpi_root, SYNC_BATCH, std::cout, best_fitness_sol, execution_time);
 
 	readSolution(solfs, tsp);
 

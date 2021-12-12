@@ -41,6 +41,6 @@ std::string trim(std::string s);
 bool checkKeyword(std::string keyword, std::string value, std::string &name, int &dimension);
 void printSolution(Map &tsp, float optimalTourSize, float optimalTourCost);
 std::string getParam(std::string cmd, int argc, char **argv);
-void parseArgs(int argc, char **argv, std::ifstream &problemFileStream, std::ifstream &solutionFileStream);
+void parseArgs(int argc, char **argv, std::ifstream &problemFileStream, std::ifstream &solutionFileStream, int &POPULATION_SIZE, int &CHILD_PER_GNOME, int &MAX_NUMBER_MUTATIONS, int &NUMBER_GENERATIONS, int &GEN_BATCH, bool &SYNC_BATCH);
 
 #endif /* TSPLIB_H */
