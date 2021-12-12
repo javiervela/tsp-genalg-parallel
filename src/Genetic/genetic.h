@@ -26,4 +26,4 @@ struct individual
 	float fitness;
 };
 
-void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER_GNOME, int MAX_NUMBER_MUTATIONS, int GEN_BATCH, int mpi_rank, int mpi_size, int mpi_root, std::ostream &oss, float &best_fitness_sol, microseconds &execution_time);
+void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER_GNOME, int MAX_NUMBER_MUTATIONS, int GEN_BATCH, int mpi_rank, int mpi_size, int mpi_root, bool SYNC_BATCH, std::ostream &oss, float &best_fitness_sol, microseconds &execution_time);
