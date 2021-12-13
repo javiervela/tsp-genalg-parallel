@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <chrono>
 #include "genetic.h"
+#include "omp.h"
 #include "mpi.h"
 
 using namespace std;
@@ -104,20 +105,16 @@ int rand_num(int start, int end)
  * @param V size of map
  * @return Mutated GNOME is a string with a random interchange of two genes to create variation in species
  */
-
-// TODO add <thread id> and <thread total num> to paralleliza mutation with threads
-/* calculate 
-int begin = (<size gnome> * <thread id>) / <thread total num>;
-int end = ((<size gnome> * (<thread id> + 1)) / <thread total num>) - 1; 
- */
-std::vector<int> mutate_gnome(std::vector<int> gnome, int V)
+std::vector<int> mutate_gnome(std::vector<int> gnome, int V, int thread_id, int thread_total)
 {
+	int begin = (V * thread_id) / thread_total + 1;
+	int end = ((V * (thread_id + 1)) / thread_total);
 	bool mutated = false;
 
 	while (!mutated)
 	{
-		int r = rand_num(1, V);
-		int r1 = rand_num(1, V);
+		int r = rand_num(begin, end);
+		int r1 = rand_num(begin, end);
 		if (r1 != r)
 		{
 			int temp = gnome[r];
@@ -256,6 +253,7 @@ void print_best_gnome(int gen, int mpi_rank, std::vector<individual> &population
  */
 void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER_GNOME, int MAX_NUMBER_MUTATIONS, int GEN_BATCH, int mpi_rank, int mpi_size, int mpi_root, bool SYNC_BATCH, std::ostream &oss, float &best_fitness_sol, microseconds &execution_time)
 {
+
 	// Generation Number
 	int gen = 1;
 
@@ -299,33 +297,55 @@ void GenAlg(Map &tsp, int POPULATION_SIZE, int NUMBER_GENERATIONS, int CHILD_PER
 			// POPULATION_SIZE / CHILD_PER_GNOME gnomes are selected to breed next generation
 
 			// The fittest does not mutate
-			for (int i = 0; i < CHILD_PER_GNOME; i++)
+			for (int child = 0; child < CHILD_PER_GNOME; child++)
 			{
 				new_population.push_back(population[0]);
 			}
 
-			// For every other selected member of the population
-			for (int i = 1; i < (NODE_POPULATION_SIZE / CHILD_PER_GNOME); i++)
+			/* DEBUG */ // static bool first = true;
+
+#pragma omp parallel
 			{
-				struct individual p1 = population[i];
+				/* DEBIG */ // if (first)
+				/* DEBIG */ // {
+				/* DEBIG */ // 	first = false;
+				/* DEBIG */ // 	cout << " threads; " << omp_get_num_threads() << endl;
+				/* DEBIG */ // }
+				// TODO make a population for each thread private and join at the end
+				vector<struct individual> thread_population;
+				thread_population.clear();
+				// For every other selected member of the population
 
-				/* BREEDING / MUTATING */
-				// For simplicity of algorithm selected gnomes will have CHILD_PER_GNOME children
-				// These children are computed mutating a random amount of times
-
-				for (int child = 0; child < CHILD_PER_GNOME; child++)
+#pragma omp for schedule(dynamic,1)
+				for (int member = 1; member < (NODE_POPULATION_SIZE / CHILD_PER_GNOME); member++)
 				{
-					// Random number of mutations for child
-					int number_mutations = ((double)rand() / (double)RAND_MAX) * (MAX_NUMBER_MUTATIONS + 1);
-					struct individual paux = p1;
+					/* DEBUG */ // cout << "ID: " << omp_get_thread_num() << " TOT: " << omp_get_num_threads() << " member: " << member << endl;
+					struct individual p1 = population[member];
 
-					// TODO index is passed to the mutate to ensure 2 threads dont get the same city in the gnome and parallelize mutation
-					for (int i = 0; i < number_mutations; i++)
+					/* BREEDING / MUTATING */
+					// For simplicity of algorithm selected gnomes will have CHILD_PER_GNOME children
+					// These children are computed mutating a random amount of times
+					for (int child = 0; child < CHILD_PER_GNOME; child++)
 					{
-						paux.gnome = mutate_gnome(paux.gnome, tsp.dimension);
+						// Random number of mutations for child
+						int number_mutations = ((double)rand() / (double)RAND_MAX) * (MAX_NUMBER_MUTATIONS + 1);
+						struct individual paux = p1;
+
+						// TODO index is passed to the mutate to ensure 2 threads dont get the same city in the gnome and parallelize mutation
+						for (int mut_i = 0; mut_i < number_mutations; mut_i++)
+						{
+							//cout << "member: " << i << " child: " << child << " mutation: " << mut_i << " total n mut: " << number_mutations << " total threads: " << omp_get_num_threads() << endl;
+							//paux.gnome = mutate_gnome(paux.gnome, tsp.dimension, mut_i, omp_get_num_threads());
+							paux.gnome = mutate_gnome(paux.gnome, tsp.dimension, 0, 1);
+						}
+						paux.fitness = calculate_fitness(paux.gnome, tsp);
+						thread_population.push_back(paux);
 					}
-					paux.fitness = calculate_fitness(paux.gnome, tsp);
-					new_population.push_back(paux);
+				}
+
+#pragma omp critical
+				{
+					new_population.insert(new_population.end(), thread_population.begin(), thread_population.end());
 				}
 			}
 
