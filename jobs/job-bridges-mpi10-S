@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -A see180004p # 2021 Allocation -- This might change in the following years.
 #SBATCH -J tsp-genalg-parallel10-S
-#SBATCH -o tsp-genalg-parallel10-S.stdout
+#SBATCH -o ../outputs/tsp-genalg-parallel10-S.stdout
 #SBATCH -n 10
 #SBATCH -p RM
 #SBATCH -t 00:10:00
@@ -11,5 +11,5 @@
 #export OMP_NUM_THREADS=16 
 #OMP_NUM_THREADS=16 
 #-x OMP_NUM_THREADS
-mpirun -np 10 ./src/main -i ./benchmarks/TSPLIB/gr202 -P 10000 -C 10 -M 20 -G 10000 -B 50 -S
-python3 plotting/main.py ./tsp-genalg-parallel10-S.stdout plots/plot10-P-10000-C-10-M-20-G-1000-B-50-S.png
+mpirun -np 10 ../src/main -i ../benchmarks/TSPLIB/gr202 -P 10000 -C 10 -M 20 -G 10000 -B 50 -S
+python3 ../plotting/main.py ../outputs/tsp-genalg-parallel10-S.stdout ../plots/plot10-P-10000-C-10-M-20-G-1000-B-50-S.png

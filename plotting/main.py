@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
+import random
 from operator import methodcaller
 from operator import itemgetter
 import sys
+import matplotlib.colors as mcolors
 
 if len(sys.argv) < 3:
 	print("Pass input and output file name as command line argument")
@@ -37,7 +39,9 @@ subopt_sol = float(solutions[1].split()[1])
 
 times = list(map(int,map(itemgetter(1),map(methodcaller("split", "          "),time_sol[2:]))))
 
-color = ['green', 'red', 'blue', 'black']
+#color = ['green', 'red', 'blue', 'black', 'orange', 'gold', 'lime', 'turquoise', 'navy', 'pink', 'purple', 'violet', 'sage', 'linen', 'azure', 'crimson' ]
+color = list(mcolors.CSS4_COLORS)
+random.shuffle(color)
 
 legendList = []
 # plotting the points
@@ -61,5 +65,5 @@ plt.xlabel('Generation number')
 
 # function to show the plot
 # plt.show()
-plt.savefig('../plots/' + outputFilename)
+plt.savefig(outputFilename)
  
