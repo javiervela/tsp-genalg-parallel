@@ -1,0 +1,12 @@
+#!/bin/bash
+#SBATCH -A see180004p # 2021 Allocation -- This might change in the following years.
+#SBATCH -J tsp-genalg-parallel2
+#SBATCH -o tsp-genalg-parallel2.stdout
+#SBATCH -n 2
+#SBATCH -p RM
+#SBATCH -t 00:10:00
+#SBATCH -N 2
+
+
+mpirun -np 2 ./src/main -i ./benchmarks/TSPLIB/gr202 -P 10000 -C 10 -M 20 -G 10000 -B 50 
+python3 plotting/main.py ./tsp-genalg-parallel2.stdout plots/plot2-P-10000-C-10-M-20-G-1000-B-50.png
