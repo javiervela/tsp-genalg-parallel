@@ -68,15 +68,6 @@ Map readProblem(ifstream &inputFile)
         }
     }
 
-    /*  for (auto line : tsp.matrix)
-    {
-        for (auto city : line)
-        {
-            cout << city << " ";
-        }
-        cout << endl;
-    } */
-
     return tsp;
 }
 
@@ -210,17 +201,17 @@ string getParam(string cmd, int argc, char **argv)
 {
     for (int i = 0; i < argc; i++)
     {
-        if (argv[i] == cmd && i < argc - 1)
-        {
-            return argv[i + 1];
-        }
-        if (argv[i] == "-h")
+        if (argv[i] == cmd && cmd == "-h")
         {
             return "help";
         }
-        if (argv[i] == "-S")
+        if (argv[i] == cmd && cmd == "-S")
         {
             return "sync";
+        }
+        if (argv[i] == cmd && i < argc - 1)
+        {
+            return argv[i + 1];
         }
     }
     return "";
@@ -240,7 +231,7 @@ void parseArgs(int argc, char **argv, std::ifstream &problemFileStream, std::ifs
     string helpParam = getParam("-h", argc, argv);
     if (helpParam == "help")
     {
-        cout << "E-i <INPUT_FILE>"
+        cout << "-i <INPUT_FILE>"
              << endl
              << "-P <POPULATION_SIZE>"
              << endl
@@ -319,7 +310,7 @@ void parseArgs(int argc, char **argv, std::ifstream &problemFileStream, std::ifs
     }
 
     string SYNC_BATCH_string = getParam("-S", argc, argv);
-    SYNC_BATCH = SYNC_BATCH_string == "sync";
+    SYNC_BATCH = (SYNC_BATCH_string == "sync");
 
     string problemFile = inputParam + ".tsp";
     problemFileStream = ifstream(problemFile);
