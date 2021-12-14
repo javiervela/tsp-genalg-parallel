@@ -1,0 +1,13 @@
+#!/bin/bash
+#SBATCH -A see180004p # 2021 Allocation -- This might change in the following years.
+#SBATCH -J tsp-genalg-parallel4-S-minor
+#SBATCH -o tsp-genalg-parallel4-S-minor.stdout
+#SBATCH -n 4
+#SBATCH -p RM
+#SBATCH -t 00:10:00
+#SBATCH -N 4
+
+
+mpirun -np 4 ../src/main -i ../benchmarks/TSPLIB/gr202 -P 100 -C 1 -M 40 -G 1000 -B 100 -S
+mv tsp-genalg-parallel4-S-minor.stdout ../outputs
+python3 ../plotting/main.py ../outputs/tsp-genalg-parallel4-S-minor.stdout ../plots/plot4-P-100-C-1-M-40-G-1000-B-100-S-minor.png

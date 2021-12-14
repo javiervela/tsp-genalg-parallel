@@ -39,9 +39,9 @@ subopt_sol = float(solutions[1].split()[1])
 
 times = list(map(int,map(itemgetter(1),map(methodcaller("split", "          "),time_sol[2:]))))
 
-#color = ['green', 'red', 'blue', 'black', 'orange', 'gold', 'lime', 'turquoise', 'navy', 'pink', 'purple', 'violet', 'sage', 'linen', 'azure', 'crimson' ]
-color = list(mcolors.CSS4_COLORS)
-random.shuffle(color)
+color = ['green', 'red', 'blue', 'black', 'orange', 'gold', 'lime', 'turquoise', 'navy', 'pink', 'purple', 'violet', 'sage', 'linen', 'azure', 'crimson' ]
+#color = list(mcolors.CSS4_COLORS)
+#random.shuffle(color)
 
 legendList = []
 # plotting the points
